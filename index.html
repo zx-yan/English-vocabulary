@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>雅思词汇9400 (带生词本)</title>
+<title>雅思核心词汇 (带进度记忆+搜索)</title>
 <style>
     :root {
         --primary: #2563eb;       /* 核心蓝 */
@@ -17,40 +17,58 @@
         --shadow: 0 4px 20px rgba(0,0,0,0.06);
         --radius: 16px;
     }
-    
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-    
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+
     body { background: var(--bg); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-    
-    .container { width: 100%; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; flex: 1; }
-    
+
+    .container { width: 100%; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; flex: 1; position: relative; }
+
     header { text-align: center; margin-bottom: 20px; margin-top: 10px; }
     h1 { font-size: 1.8rem; font-weight: 800; color: var(--text-main); margin-bottom: 5px; }
     .subtitle { color: var(--text-sub); font-size: 0.9rem; font-weight: 400; }
+
+    /* === 搜索框样式 === */
+    .search-wrapper { position: relative; margin-bottom: 25px; z-index: 10; }
+    .search-input {
+        width: 100%; padding: 12px 15px 12px 40px; border-radius: 12px;
+        border: 2px solid transparent; background: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        font-size: 1rem; transition: all 0.2s;
+    }
+    .search-input:focus { border-color: var(--primary); box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15); }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-sub); pointer-events: none; }
     
-    /* 生词本仪表盘 */
+    /* 搜索结果下拉 */
+    .search-results {
+        position: absolute; top: 110%; left: 0; right: 0;
+        background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        max-height: 300px; overflow-y: auto; display: none;
+    }
+    .search-results.show { display: block; }
+    .search-item {
+        padding: 12px 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .search-item:last-child { border-bottom: none; }
+    .search-item:hover { background: var(--primary-light); }
+    .s-word { font-weight: 700; color: var(--text-main); }
+    .s-mean { font-size: 0.85rem; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
+
+    /* === 生词本仪表盘 === */
     .notebook-dashboard {
-        background: white;
-        border-radius: var(--radius);
-        padding: 20px;
-        margin-bottom: 25px;
-        box-shadow: var(--shadow);
-        border: 1px solid rgba(245, 158, 11, 0.2);
-        position: relative;
-        overflow: hidden;
+        background: white; border-radius: var(--radius); padding: 20px; margin-bottom: 25px;
+        box-shadow: var(--shadow); border: 1px solid rgba(245, 158, 11, 0.2); position: relative; overflow: hidden;
     }
-    .notebook-dashboard::before {
-        content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent);
-    }
+    .notebook-dashboard::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
     .nb-title { font-size: 1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
     .nb-stats { font-size: 0.9rem; color: var(--text-sub); margin-bottom: 15px; }
     .nb-count { color: var(--accent); font-weight: 800; font-size: 1.4rem; margin-right: 4px; }
-    
+
     .nb-actions { display: flex; gap: 10px; }
     .btn-review { 
         flex: 2; background: var(--accent); color: white; border: none; 
-        padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer;
-        transition: opacity 0.2s;
+        padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
     }
     .btn-download {
         flex: 1; background: #fffbeb; color: var(--accent); border: 1px solid var(--accent);
@@ -59,40 +77,40 @@
     .btn-review:hover, .btn-download:hover { opacity: 0.9; }
     .btn-review:disabled, .btn-download:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
 
-    /* 视图容器 */
+    /* === 字母网格 === */
     .view { width: 100%; transition: opacity 0.3s ease; }
     #word-view { display: none; }
-    
-    /* 字母网格 */
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; margin-top: 20px; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 12px; margin-top: 10px; }
     .letter-card {
-        background: var(--card-bg); border-radius: 12px; padding: 15px 0;
+        background: var(--card-bg); border-radius: 12px; padding: 15px 0 10px 0;
         text-align: center; box-shadow: var(--shadow); cursor: pointer;
         transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-        border: 1px solid transparent;
+        border: 1px solid transparent; position: relative; overflow: hidden;
     }
     .letter-card:hover { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 10px 25px rgba(37, 99, 235, 0.15); }
     .letter-card .char { font-size: 1.4rem; font-weight: 700; color: var(--primary); display: block; }
-    .letter-card .count { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; display: block; }
+    .letter-card .count { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; display: block; margin-bottom: 6px; }
+    
+    /* 卡片上的微型进度条 */
+    .mini-progress { height: 4px; width: 80%; background: #f1f5f9; margin: 0 auto; border-radius: 2px; overflow: hidden; }
+    .mini-fill { height: 100%; background: #4ade80; width: 0%; } /* 默认绿色 */
 
-    /* 单词学习卡片 */
+    /* === 单词学习卡片 === */
     .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .back-btn { background: none; border: none; font-size: 0.95rem; color: var(--text-sub); cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 500; transition: color 0.2s; }
     .back-btn:hover { color: var(--primary); }
-    
-    /* 自动播放开关 */
+
     .autoplay-toggle {
         display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-main);
         background: white; padding: 6px 12px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
     .autoplay-toggle input { width: 16px; height: 16px; accent-color: var(--primary); }
 
-    /* 进度条 */
     .progress-track { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin-bottom: 25px; }
     .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s ease; }
     .progress-fill.review-mode { background: var(--accent); }
 
-    /* 核心卡片 */
     .card {
         background: var(--card-bg); border-radius: var(--radius);
         padding: 40px 20px; text-align: center;
@@ -100,16 +118,16 @@
         position: relative; overflow: hidden;
         min-height: 320px; display: flex; flex-direction: column; justify-content: center;
     }
-    
-    .word { font-size: 2.8rem; font-weight: 800; color: var(--text-main); margin-bottom: 5px; line-height: 1.2; word-break: break-all;}
+
+    .word { font-size: 2.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 5px; line-height: 1.2; word-break: break-word;}
     .phonetic { 
-        font-size: 1.2rem; color: var(--text-sub); 
+        font-size: 1.1rem; color: var(--text-sub); 
         font-family: "Lucida Sans Unicode", "Arial Unicode MS", sans-serif; 
         margin-bottom: 25px; min-height: 1.5em; 
         display: flex; align-items: center; justify-content: center; gap: 8px;
     }
     .phonetic.loading { opacity: 0.5; font-size: 0.9rem; }
-    
+
     .meaning-box {
         padding: 20px; background: var(--primary-light); border-radius: 12px;
         color: var(--text-main); font-size: 1.1rem; line-height: 1.6;
@@ -122,7 +140,6 @@
         font-size: 0.9rem; font-weight: 500; top: 50%; left: 50%; transform: translate(-50%, -50%);
     }
 
-    /* 按钮组 */
     .controls { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 15px; margin-top: auto; }
     .btn {
         border: none; padding: 14px 0; border-radius: 12px; font-size: 1rem; cursor: pointer;
@@ -136,8 +153,7 @@
     .speaker-btn {
         background: none; border: none; cursor: pointer; font-size: 1.5rem;
         margin-left: 10px; vertical-align: middle; color: var(--primary);
-        transition: transform 0.1s;
-        width: 40px; height: 40px; border-radius: 50%;
+        transition: transform 0.1s; width: 40px; height: 40px; border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
     }
     .speaker-btn:hover { background: #f0f9ff; transform: scale(1.1); }
@@ -149,7 +165,6 @@
         100% { transform: scale(1); opacity: 1; }
     }
 
-    /* 生词本按钮 */
     .action-row { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
     .btn-small {
         padding: 8px 16px; font-size: 0.85rem; border-radius: 20px;
@@ -158,108 +173,119 @@
     }
     .btn-small.active { border-color: var(--accent); color: var(--accent); background: #fffbeb; }
 
+    /* 重置进度按钮 */
+    .reset-link { margin-top: 30px; color: #94a3b8; font-size: 0.8rem; text-decoration: underline; cursor: pointer; }
+
     @media (max-width: 480px) {
-        .word { font-size: 2.2rem; }
+        .word { font-size: 2rem; }
         .controls { gap: 10px; }
     }
 </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- 字母选择列表 -->
-        <div id="letter-view" class="view">
-            <header>
-                <h1>IELTS 雅思词汇</h1>
-                <p class="subtitle">点击字母组开始背诵，点击星号☆加入生词本</p>
-            </header>
+<div class="container">
+    <!-- 字母选择列表 -->
+    <div id="letter-view" class="view">
+        <header>
+            <h1>IELTS 雅思核心词汇</h1>
+            <p class="subtitle">记忆进度自动保存 • 支持搜索</p>
+        </header>
 
-            <!-- 生词本控制台 -->
-            <div class="notebook-dashboard">
-                <div class="nb-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                    我的生词本
-                </div>
-                <div class="nb-stats">
-                    已收藏 <span class="nb-count" id="nb-count">0</span> 个生僻词
-                </div>
-                <div class="nb-actions">
-                    <button class="btn-review" id="btn-start-review" onclick="startNotebookReview()">开始复习</button>
-                    <button class="btn-download" id="btn-download" onclick="exportRareWords()">
-                        <svg style="vertical-align:middle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        导出生词
-                    </button>
-                </div>
-            </div>
-
-            <div id="grid-container" class="grid">
-                <!-- JS动态生成 -->
-            </div>
-            
-            <div style="margin-top: 40px; text-align: center; color: #999; font-size: 0.8rem;">
-                <p>支持键盘 ← → 切换，空格显示释义，Enter 朗读</p>
+        <!-- 搜索功能 -->
+        <div class="search-wrapper">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" class="search-input" id="search-input" placeholder="搜索单词 (例如: abandon)..." oninput="handleSearch()">
+            <div class="search-results" id="search-results">
+                <!-- 搜索结果动态填充 -->
             </div>
         </div>
 
-        <!-- 单词学习界面 -->
-        <div id="word-view" class="view">
-            <div class="top-nav">
-                <button class="back-btn" onclick="showLetterView()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                    返回列表
+        <!-- 生词本控制台 -->
+        <div class="notebook-dashboard">
+            <div class="nb-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                我的生词本
+            </div>
+            <div class="nb-stats">
+                已收藏 <span class="nb-count" id="nb-count">0</span> 个生僻词
+            </div>
+            <div class="nb-actions">
+                <button class="btn-review" id="btn-start-review" onclick="startNotebookReview()">开始复习</button>
+                <button class="btn-download" id="btn-download" onclick="exportRareWords()">
+                    <svg style="vertical-align:middle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    导出
                 </button>
-                
-                <!-- 自动播放开关 -->
-                <label class="autoplay-toggle">
-                    <input type="checkbox" id="autoplay-switch" checked> 
-                    <span>自动朗读</span>
-                </label>
             </div>
+        </div>
 
-            <div class="progress-track">
-                <div class="progress-fill" id="progress-bar"></div>
+        <div id="grid-container" class="grid">
+            <!-- JS动态生成 -->
+        </div>
+        
+        <div style="text-align: center;">
+            <div style="margin-top: 40px; color: #999; font-size: 0.8rem;">
+                <p>支持键盘 ← → 切换，空格显示释义</p>
             </div>
-
-            <div class="card">
-                <div>
-                    <div style="display:flex; align-items:center; justify-content:center; margin-bottom:5px; gap: 5px;">
-                        <div class="word" id="word">loading...</div>
-                        <button id="speaker-btn" class="speaker-btn" onclick="speakCurrent()" title="点击播放发音">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                        </button>
-                    </div>
-                    <!-- 音标显示区域 -->
-                    <div class="phonetic" id="phonetic"></div>
-                </div>
-                
-                <div class="meaning-box hidden" id="meaning-box" onclick="toggleMeaning()">
-                    <div id="meaning"></div>
-                </div>
-            </div>
-
-            <div class="controls">
-                <button class="btn btn-icon" onclick="prevWord()">←</button>
-                <button class="btn btn-main" onclick="toggleMeaning()">显示释义</button>
-                <button class="btn btn-icon" onclick="nextWord()">→</button>
-            </div>
-
-            <div class="action-row">
-                <button class="btn-small" id="btn-rare" onclick="toggleRare()">☆ 加入生词本</button>
-            </div>
-            
-            <div style="text-align: center; margin-top: 15px; color: #cbd5e1; font-size: 0.8rem;" id="progress-text">1 / 10</div>
+            <div class="reset-link" onclick="resetAllProgress()">[清除所有记忆进度]</div>
         </div>
     </div>
 
-    <!-- 隐藏的音频元素用于播放 -->
-    <audio id="audio-player" style="display:none;"></audio>
+    <!-- 单词学习界面 -->
+    <div id="word-view" class="view">
+        <div class="top-nav">
+            <button class="back-btn" onclick="showLetterView()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                返回列表
+            </button>
+            
+            <label class="autoplay-toggle">
+                <input type="checkbox" id="autoplay-switch" checked> 
+                <span>自动朗读</span>
+            </label>
+        </div>
 
-    <script>
-        // =======================
-        // 数据源 (请在此处粘贴你的CSV内容)
-        // 格式: 序号,单词,释义
-        // =======================
-        const VOCABULARY_DATA = `1,A.D.,(缩)公元
+        <div class="progress-track">
+            <div class="progress-fill" id="progress-bar"></div>
+        </div>
+
+        <div class="card">
+            <div>
+                <div style="display:flex; align-items:center; justify-content:center; margin-bottom:5px; gap: 5px;">
+                    <div class="word" id="word">loading...</div>
+                    <button id="speaker-btn" class="speaker-btn" onclick="speakCurrent()" title="点击播放发音">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    </button>
+                </div>
+                <div class="phonetic" id="phonetic"></div>
+            </div>
+            
+            <div class="meaning-box hidden" id="meaning-box" onclick="toggleMeaning()">
+                <div id="meaning"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-icon" onclick="prevWord()">←</button>
+            <button class="btn btn-main" onclick="toggleMeaning()">显示释义</button>
+            <button class="btn btn-icon" onclick="nextWord()">→</button>
+        </div>
+
+        <div class="action-row">
+            <button class="btn-small" id="btn-rare" onclick="toggleRare()">☆ 加入生词本</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 15px; color: #cbd5e1; font-size: 0.8rem;" id="progress-text">1 / 10</div>
+    </div>
+</div>
+
+<audio id="audio-player" style="display:none;"></audio>
+
+<script>
+    // =======================
+    // 数据源
+    // =======================
+    const VOCABULARY_DATA = `1,A.D.,(缩)公元
 2,A.M.,(缩)上午
 3,abandon,vt. 抛弃;放弃
 4,abandonment,n.放弃
@@ -9654,356 +9680,396 @@
 9388,zoo,n. 动物园
 9389,zoology,n. 动物学
 `;
-// ↑ 在这里替换成你的全部雅思词汇CSV内容
 
-        // =======================
-        // 核心逻辑
-        // =======================
-        
-        // 解析CSV (适配你的格式：序号,单词,释义)
-        function parseCSV(csvText) {
-            const lines = csvText.trim().split('\n');
-            const result = [];
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-                
-                // 正则匹配: 序号, 单词, 剩余部分(释义)
-                const match = line.match(/^(\d+),([^,]+),(.*)$/);
-                if (match) {
-                    let meaning = match[3].trim();
-                    // 处理CSV中可能存在的引号包裹和内部转义
-                    if (meaning.startsWith('"') && meaning.endsWith('"')) {
-                        meaning = meaning.slice(1, -1).replace(/""/g, '"');
-                    }
-                    // 新数据没有音标，设为空
-                    result.push({ word: match[2].trim(), meaning: meaning, phonetic: "" });
+    // =======================
+    // 核心逻辑
+    // =======================
+    
+    // 解析CSV
+    function parseCSV(csvText) {
+        const lines = csvText.trim().split('\n');
+        const result = [];
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            const match = line.match(/^(\d+),([^,]+),(.*)$/);
+            if (match) {
+                let meaning = match[3].trim();
+                if (meaning.startsWith('"') && meaning.endsWith('"')) {
+                    meaning = meaning.slice(1, -1).replace(/""/g, '"');
                 }
+                result.push({ word: match[2].trim(), meaning: meaning, phonetic: "" });
             }
-            return result;
         }
-        
-        const ALL_WORDS = parseCSV(VOCABULARY_DATA);
-        // Map用于快速查找完整单词信息
-        const ALL_WORDS_MAP = new Map(ALL_WORDS.map(i => [i.word, i])); 
+        return result;
+    }
+    
+    const ALL_WORDS = parseCSV(VOCABULARY_DATA);
+    const ALL_WORDS_MAP = new Map(ALL_WORDS.map(i => [i.word, i])); 
 
-        // 按首字母分组
-        const WORD_GROUPS = {};
-        ALL_WORDS.forEach(item => {
-            let letter = item.word.charAt(0).toUpperCase();
-            if (!/[A-Z]/.test(letter)) letter = '#'; // 非字母开头的归类
-            if (!WORD_GROUPS[letter]) WORD_GROUPS[letter] = [];
-            WORD_GROUPS[letter].push(item);
+    // 按首字母分组
+    const WORD_GROUPS = {};
+    ALL_WORDS.forEach(item => {
+        let letter = item.word.charAt(0).toUpperCase();
+        if (!/[A-Z]/.test(letter)) letter = '#';
+        if (!WORD_GROUPS[letter]) WORD_GROUPS[letter] = [];
+        WORD_GROUPS[letter].push(item);
+    });
+
+    // 状态管理
+    let currentWordList = [];
+    let currentIndex = 0;
+    let currentGroupKey = null; // 当前正在学习的组 (A, B, #, 'review' or 'search')
+    let rareWords = JSON.parse(localStorage.getItem('ielts_rare_words') || '[]');
+    let progressMap = JSON.parse(localStorage.getItem('ielts_progress') || '{}'); // 进度记忆 { "A": 5, "B": 10 }
+    let phoneticCache = {};
+    let isReviewMode = false;
+    let isSearchMode = false; // 是否为搜索模式
+
+    function init() {
+        renderGrid();
+        updateNotebookStats();
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('word-view').style.display === 'block') {
+                if (e.code === 'ArrowRight') nextWord();
+                if (e.code === 'ArrowLeft') prevWord();
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    toggleMeaning();
+                }
+                if (e.code === 'Enter') speakCurrent();
+            }
         });
-
-        let currentWordList = []; // 当前显示的单词列表 (可能来自字母组或生词本)
-        let currentIndex = 0;     // 当前单词在 currentWordList 中的索引
-        let rareWords = JSON.parse(localStorage.getItem('ielts_rare_words') || '[]'); // 从LocalStorage读取生词本
-        let phoneticCache = {};   // 缓存获取到的音标
-        let isReviewMode = false; // 标记是否为生词本复习模式
-
-        function init() {
-            renderGrid();
-            updateNotebookStats();
-            
-            // 键盘快捷键监听
-            document.addEventListener('keydown', (e) => {
-                if (document.getElementById('word-view').style.display === 'block') {
-                    if (e.code === 'ArrowRight') nextWord();
-                    if (e.code === 'ArrowLeft') prevWord();
-                    if (e.code === 'Space') {
-                        e.preventDefault(); // 防止页面滚动
-                        toggleMeaning();
-                    }
-                    if (e.code === 'Enter') speakCurrent(); // Enter 键朗读
-                }
-            });
-        }
-
-        // 渲染字母网格
-        function renderGrid() {
-            const container = document.getElementById('grid-container');
-            container.innerHTML = ''; // 清空旧内容
-            
-            // 检查是否有数据
-            if (Object.keys(WORD_GROUPS).length === 0) {
-                 container.innerHTML = '<div style="text-align:center;grid-column:1/-1;color:#999;padding:20px;">暂无数据，请检查VOCABULARY_DATA变量</div>';
-                 return;
-            }
-
-            // 按字母顺序排序并创建卡片
-            Object.keys(WORD_GROUPS).sort().forEach(key => {
-                const list = WORD_GROUPS[key];
-                const card = document.createElement('div');
-                card.className = 'letter-card';
-                card.innerHTML = `<span class="char">${key}</span><span class="count">${list.length} 词</span>`;
-                card.onclick = () => startLearning(key); // 点击进入学习模式
-                container.appendChild(card);
-            });
-        }
-
-        // 更新生词本统计和按钮状态
-        function updateNotebookStats() {
-            const count = rareWords.length;
-            document.getElementById('nb-count').textContent = count;
-            document.getElementById('btn-start-review').disabled = count === 0;
-            document.getElementById('btn-download').disabled = count === 0;
-        }
-
-        // 进入字母学习模式
-        function startLearning(key) {
-            isReviewMode = false;
-            currentWordList = WORD_GROUPS[key];
-            currentIndex = 0;
-            document.getElementById('letter-view').style.display = 'none';
-            document.getElementById('word-view').style.display = 'block';
-            updateCard(true); // 传入 true 表示初次加载，不自动播放
-        }
-
-        // 进入生词本复习模式
-        function startNotebookReview() {
-            if (rareWords.length === 0) return;
-            
-            // 从完整词库中查找生词本中的词
-            currentWordList = rareWords
-                .map(word => ALL_WORDS_MAP.get(word))
-                .filter(item => item !== undefined); // 确保找到词条
-            
-            if (currentWordList.length === 0) return; // 如果生词本数据有问题
-            
-            isReviewMode = true;
-            currentIndex = 0;
-            document.getElementById('letter-view').style.display = 'none';
-            document.getElementById('word-view').style.block = 'block'; // 确保显示
-            document.getElementById('group-title').textContent = '⭐ 生词本复习'; // 更新标题
-            updateCard(true); // 传入 true 表示初次加载，不自动播放
-        }
-
-        // 返回字母列表界面
-        function showLetterView() {
-            document.getElementById('word-view').style.display = 'none';
-            document.getElementById('letter-view').style.display = 'block';
-            updateNotebookStats(); // 返回时更新生词本状态
-        }
-
-        // 更新单词卡片内容
-        async function updateCard(isFirstLoad = false) {
-            const item = currentWordList[currentIndex];
-            const word = item.word;
-
-            // 1. 更新单词和释义
-            document.getElementById('word').textContent = word;
-            document.getElementById('meaning').textContent = item.meaning;
-            document.getElementById('meaning-box').classList.add('hidden'); // 默认隐藏释义
-            
-            // 2. 更新进度条和文字
-            const progress = ((currentIndex + 1) / currentWordList.length) * 100;
-            document.getElementById('progress-bar').style.width = `${progress}%`;
-            document.getElementById('progress-text').textContent = `${currentIndex + 1} / ${currentWordList.length}`;
-
-            // 3. 获取并显示音标
-            const phoneticEl = document.getElementById('phonetic');
-            phoneticEl.textContent = ''; // 先清空
-            phoneticEl.classList.add('loading'); // 显示加载状态
-
-            // 优先使用缓存
-            if (phoneticCache[word]) {
-                phoneticEl.classList.remove('loading');
-                phoneticEl.textContent = phoneticCache[word];
-            } else {
-                // 仅对纯字母单词尝试API调用
-                if (/^[a-zA-Z]+$/.test(word)) {
-                    fetchPhoneticFromAPI(word).then(p => {
-                        // 检查是否是当前显示的单词，防止快速切换乱序
-                        if (currentWordList[currentIndex]?.word === word) {
-                            phoneticCache[word] = p; // 缓存音标
-                            phoneticEl.classList.remove('loading');
-                            phoneticEl.textContent = p;
-                        }
-                    });
-                } else {
-                    // 非纯字母单词（如缩写）不尝试获取音标
-                    phoneticEl.classList.remove('loading');
-                }
-            }
-
-            // 4. 自动朗读（如果开启）
-            if (!isFirstLoad) { // 首次加载不自动朗读
-                const autoPlayOn = document.getElementById('autoplay-switch').checked;
-                if (autoPlayOn) {
-                    setTimeout(() => { // 延迟一点，避免声音卡顿
-                        if (currentWordList[currentIndex]?.word === word) { // 再次确认是当前卡片
-                            speakCurrent();
-                        }
-                    }, 300);
-                }
-            }
-            
-            updateRareBtnState(); // 更新生词本按钮状态
-        }
-
-        // 从API获取音标
-        async function fetchPhoneticFromAPI(word) {
-            try {
-                // 使用免费的 DictionaryAPI
-                const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-                const data = await res.json();
-                
-                if (data && Array.isArray(data) && data.length > 0 && data[0].phonetics) {
-                    // 尝试获取美式音标（通常带 -us 标识）
-                    const usPhonetic = data[0].phonetics.find(p => p.text && p.audio && p.audio.includes('-us'));
-                    if (usPhonetic) return usPhonetic.text;
-                    
-                    // 否则，取第一个找到的音标文本
-                    const anyPhonetic = data[0].phonetics.find(p => p.text);
-                    if (anyPhonetic) return anyPhonetic.text;
-                }
-            } catch (e) {
-                console.error('Error fetching phonetic:', e);
-            }
-            return ''; // 获取失败则为空
-        }
-
-        // 切换释义显示
-        function toggleMeaning() {
-            document.getElementById('meaning-box').classList.toggle('hidden');
-        }
-
-        // 下一个单词
-        function nextWord() {
-            if (currentIndex < currentWordList.length - 1) {
-                currentIndex++;
-                updateCard();
-            } else {
-                alert(isReviewMode ? '生词本复习完成！' : '本组单词已学完！');
-            }
-        }
-
-        // 上一个单词
-        function prevWord() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateCard();
-            }
-        }
-
-        // =======================
-        // 语音播放功能 (有道API + 原生降级)
-        // =======================
-        function speakCurrent() {
-            const word = currentWordList[currentIndex].word;
-            const btn = document.getElementById('speaker-btn');
-            
-            btn.classList.add('playing'); // 添加播放动画
-            const player = document.getElementById('audio-player');
-            
-            // 优先使用有道API
-            player.src = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`; // type=2 为美音
-            
-            player.onended = () => btn.classList.remove('playing'); // 播放结束移除动画
-            
-            player.onerror = () => {
-                console.log('Online audio failed, switching to native.');
-                speakNative(word); // 失败后尝试原生播放
-                btn.classList.remove('playing');
-            };
-
-            // 尝试播放
-            const playPromise = player.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log('Playback prevented:', error);
-                    // 如果不是因为用户交互被阻止，尝试原生
-                    if (error.name !== 'NotAllowedError') {
-                        speakNative(word);
-                    }
-                    btn.classList.remove('playing');
-                });
-            }
-        }
-
-        // 原生浏览器语音合成 (作为备用)
-        function speakNative(word) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // 停止当前所有语音
-                const u = new SpeechSynthesisUtterance(word);
-                u.lang = 'en-US'; // 设置语言为美式英语
-                u.rate = 0.9; // 语速
-                window.speechSynthesis.speak(u);
-            } else {
-                alert('您的浏览器不支持语音播放功能。');
-            }
-        }
-
-        // =======================
-        // 生词本操作
-        // =======================
         
-        // 更新生词本按钮状态（☆ 或 ★）
-        function updateRareBtnState() {
-            const word = currentWordList[currentIndex].word;
-            const btn = document.getElementById('btn-rare');
-            if (rareWords.includes(word)) {
-                btn.classList.add('active');
-                btn.textContent = '★ 已收藏';
+        // 点击页面其他地方关闭搜索结果
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-wrapper')) {
+                document.getElementById('search-results').classList.remove('show');
+            }
+        });
+    }
+
+    // 保存当前进度
+    function saveProgress() {
+        if (currentGroupKey && !isSearchMode) {
+            progressMap[currentGroupKey] = currentIndex;
+            localStorage.setItem('ielts_progress', JSON.stringify(progressMap));
+        }
+    }
+
+    // 重置所有进度
+    function resetAllProgress() {
+        if(confirm('确定要清除所有字母的背诵进度吗？生词本不会被清空。')) {
+            localStorage.removeItem('ielts_progress');
+            progressMap = {};
+            renderGrid();
+            alert('进度已重置');
+        }
+    }
+
+    // 渲染字母网格 (带进度条)
+    function renderGrid() {
+        const container = document.getElementById('grid-container');
+        container.innerHTML = '';
+        
+        if (Object.keys(WORD_GROUPS).length === 0) {
+             container.innerHTML = '<div style="text-align:center;grid-column:1/-1;color:#999;padding:20px;">暂无数据</div>';
+             return;
+        }
+
+        Object.keys(WORD_GROUPS).sort().forEach(key => {
+            const list = WORD_GROUPS[key];
+            const savedIndex = progressMap[key] || 0;
+            const percentage = Math.min(100, Math.round(((savedIndex) / list.length) * 100));
+            
+            const card = document.createElement('div');
+            card.className = 'letter-card';
+            card.innerHTML = `
+                <span class="char">${key}</span>
+                <span class="count">${list.length} 词</span>
+                <div class="mini-progress" title="进度: ${percentage}%">
+                    <div class="mini-fill" style="width: ${percentage}%"></div>
+                </div>
+            `;
+            card.onclick = () => startLearning(key);
+            container.appendChild(card);
+        });
+    }
+
+    function updateNotebookStats() {
+        const count = rareWords.length;
+        document.getElementById('nb-count').textContent = count;
+        document.getElementById('btn-start-review').disabled = count === 0;
+        document.getElementById('btn-download').disabled = count === 0;
+    }
+
+    // === 搜索功能 ===
+    function handleSearch() {
+        const input = document.getElementById('search-input');
+        const query = input.value.trim().toLowerCase();
+        const resultsContainer = document.getElementById('search-results');
+        
+        if (query.length < 1) {
+            resultsContainer.classList.remove('show');
+            return;
+        }
+
+        const matches = ALL_WORDS.filter(item => item.word.toLowerCase().startsWith(query)).slice(0, 10);
+        
+        if (matches.length > 0) {
+            resultsContainer.innerHTML = matches.map(item => `
+                <div class="search-item" onclick="enterSearchMode('${item.word}')">
+                    <span class="s-word">${item.word}</span>
+                    <span class="s-mean">${item.meaning}</span>
+                </div>
+            `).join('');
+            resultsContainer.classList.add('show');
+        } else {
+            resultsContainer.classList.remove('show');
+        }
+    }
+
+    // 进入搜索结果模式 (单词模式)
+    function enterSearchMode(word) {
+        const item = ALL_WORDS_MAP.get(word);
+        if (!item) return;
+
+        // 重置搜索框
+        document.getElementById('search-input').value = '';
+        document.getElementById('search-results').classList.remove('show');
+
+        isReviewMode = false;
+        isSearchMode = true; // 标记为搜索模式，不保存进度
+        currentGroupKey = null;
+        
+        currentWordList = [item]; // 列表里只有一个词
+        currentIndex = 0;
+        
+        document.getElementById('letter-view').style.display = 'none';
+        document.getElementById('word-view').style.display = 'block';
+        updateCard(true);
+    }
+    // === 结束搜索功能 ===
+
+    // 进入字母学习模式 (恢复进度)
+    function startLearning(key) {
+        isReviewMode = false;
+        isSearchMode = false;
+        currentGroupKey = key;
+        
+        currentWordList = WORD_GROUPS[key];
+        // 恢复进度
+        currentIndex = progressMap[key] || 0;
+        if (currentIndex >= currentWordList.length) currentIndex = 0; // 防止越界
+
+        document.getElementById('letter-view').style.display = 'none';
+        document.getElementById('word-view').style.display = 'block';
+        updateCard(true);
+    }
+
+    // 进入生词本复习
+    function startNotebookReview() {
+        if (rareWords.length === 0) return;
+        
+        currentWordList = rareWords.map(word => ALL_WORDS_MAP.get(word)).filter(i => i);
+        if (currentWordList.length === 0) return;
+        
+        isReviewMode = true;
+        isSearchMode = false;
+        currentGroupKey = 'notebook_review'; // 生词本也保存进度
+
+        // 恢复生词本进度
+        currentIndex = progressMap['notebook_review'] || 0;
+        if (currentIndex >= currentWordList.length) currentIndex = 0;
+
+        document.getElementById('letter-view').style.display = 'none';
+        document.getElementById('word-view').style.display = 'block';
+        updateCard(true);
+    }
+
+    function showLetterView() {
+        document.getElementById('word-view').style.display = 'none';
+        document.getElementById('letter-view').style.display = 'block';
+        renderGrid(); // 重新渲染以更新进度条
+        updateNotebookStats();
+    }
+
+    // 更新卡片
+    async function updateCard(isFirstLoad = false) {
+        const item = currentWordList[currentIndex];
+        const word = item.word;
+
+        document.getElementById('word').textContent = word;
+        document.getElementById('meaning').textContent = item.meaning;
+        document.getElementById('meaning-box').classList.add('hidden');
+        
+        // 更新进度条
+        const progress = ((currentIndex + 1) / currentWordList.length) * 100;
+        const progressBar = document.getElementById('progress-bar');
+        progressBar.style.width = `${progress}%`;
+        
+        if (isReviewMode) progressBar.classList.add('review-mode');
+        else progressBar.classList.remove('review-mode');
+
+        document.getElementById('progress-text').textContent = `${currentIndex + 1} / ${currentWordList.length}`;
+
+        // 保存进度
+        saveProgress();
+
+        // 获取音标
+        const phoneticEl = document.getElementById('phonetic');
+        phoneticEl.textContent = '';
+        phoneticEl.classList.add('loading');
+
+        if (phoneticCache[word]) {
+            phoneticEl.classList.remove('loading');
+            phoneticEl.textContent = phoneticCache[word];
+        } else {
+            if (/^[a-zA-Z]+$/.test(word)) {
+                fetchPhoneticFromAPI(word).then(p => {
+                    if (currentWordList[currentIndex]?.word === word) {
+                        phoneticCache[word] = p;
+                        phoneticEl.classList.remove('loading');
+                        phoneticEl.textContent = p;
+                    }
+                });
             } else {
-                btn.classList.remove('active');
-                btn.textContent = '☆ 加入生词本';
+                phoneticEl.classList.remove('loading');
             }
         }
 
-        // 添加或移除生词
-        function toggleRare() {
-            const word = currentWordList[currentIndex].word;
-            const idx = rareWords.indexOf(word);
-            
-            if (idx > -1) { // 已存在，则移除
-                rareWords.splice(idx, 1);
-            } else { // 不存在，则添加
-                rareWords.push(word);
+        // 自动播放
+        if (!isFirstLoad) {
+            const autoPlayOn = document.getElementById('autoplay-switch').checked;
+            if (autoPlayOn) {
+                setTimeout(() => {
+                    if (currentWordList[currentIndex]?.word === word) speakCurrent();
+                }, 300);
             }
-            
-            localStorage.setItem('ielts_rare_words', JSON.stringify(rareWords)); // 保存到本地
-            updateRareBtnState(); // 更新按钮显示
-            updateNotebookStats(); // 更新生词本统计
         }
+        
+        updateRareBtnState();
+    }
 
-        // 导出生词本为CSV
-        function exportRareWords() {
-            if (rareWords.length === 0) return;
+    async function fetchPhoneticFromAPI(word) {
+        try {
+            const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+            const data = await res.json();
+            if (data && data[0]?.phonetics) {
+                const us = data[0].phonetics.find(p => p.audio?.includes('-us'));
+                return us ? us.text : (data[0].phonetics.find(p => p.text)?.text || '');
+            }
+        } catch (e) { console.error(e); }
+        return '';
+    }
 
-            const data = [];
-            data.push('Index,Word,Meaning'); // CSV 表头
-            
-            let index = 1;
-            rareWords.forEach(w => {
-                const item = ALL_WORDS_MAP.get(w); // 从Map获取完整词条信息
-                if (item) {
-                    // 处理释义中的逗号和引号，确保CSV格式正确
-                    const meaning = `"${item.meaning.replace(/"/g, '""')}"`; 
-                    data.push(`${index},${item.word},${meaning}`);
-                    index++;
+    function toggleMeaning() {
+        document.getElementById('meaning-box').classList.toggle('hidden');
+    }
+
+    function nextWord() {
+        if (currentIndex < currentWordList.length - 1) {
+            currentIndex++;
+            updateCard();
+        } else {
+            if(!isSearchMode) {
+                alert(isReviewMode ? '生词本复习完成！' : '本组单词已学完！');
+                // 学完重置该组进度
+                if(currentGroupKey) {
+                    progressMap[currentGroupKey] = 0;
+                    localStorage.setItem('ielts_progress', JSON.stringify(progressMap));
                 }
-            });
-
-            // 创建CSV文件内容 (添加 BOM 防止Excel乱码)
-            const csvContent = '\uFEFF' + data.join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            
-            // 创建下载链接并触发下载
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.setAttribute('href', url);
-            const date = new Date().toISOString().slice(0,10); // 格式化日期
-            link.setAttribute('download', `IELTS_Review_Words_${date}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link); // 清理DOM
+                showLetterView();
+            }
         }
+    }
 
-        // 页面加载完成时初始化
-        init();
-    </script>
+    function prevWord() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            updateCard();
+        }
+    }
+
+    // 语音播放
+    function speakCurrent() {
+        const word = currentWordList[currentIndex].word;
+        const btn = document.getElementById('speaker-btn');
+        btn.classList.add('playing'); 
+        
+        const player = document.getElementById('audio-player');
+        player.src = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`;
+        
+        player.onended = () => btn.classList.remove('playing');
+        player.onerror = () => {
+            speakNative(word);
+            btn.classList.remove('playing');
+        };
+
+        player.play().catch(() => {
+            speakNative(word);
+            btn.classList.remove('playing');
+        });
+    }
+
+    function speakNative(word) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(word);
+            u.lang = 'en-US';
+            u.rate = 0.9;
+            window.speechSynthesis.speak(u);
+        }
+    }
+
+    // 生词本操作
+    function updateRareBtnState() {
+        const word = currentWordList[currentIndex].word;
+        const btn = document.getElementById('btn-rare');
+        if (rareWords.includes(word)) {
+            btn.classList.add('active');
+            btn.textContent = '★ 已收藏';
+        } else {
+            btn.classList.remove('active');
+            btn.textContent = '☆ 加入生词本';
+        }
+    }
+
+    function toggleRare() {
+        const word = currentWordList[currentIndex].word;
+        const idx = rareWords.indexOf(word);
+        
+        if (idx > -1) rareWords.splice(idx, 1);
+        else rareWords.push(word);
+        
+        localStorage.setItem('ielts_rare_words', JSON.stringify(rareWords));
+        updateRareBtnState();
+        updateNotebookStats();
+    }
+
+    function exportRareWords() {
+        if (rareWords.length === 0) return;
+        const data = ['Index,Word,Meaning'];
+        let index = 1;
+        rareWords.forEach(w => {
+            const item = ALL_WORDS_MAP.get(w);
+            if (item) {
+                const meaning = `"${item.meaning.replace(/"/g, '""')}"`; 
+                data.push(`${index},${item.word},${meaning}`);
+                index++;
+            }
+        });
+        const blob = new Blob(['\uFEFF' + data.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `IELTS_Review_Words_${new Date().toISOString().slice(0,10)}.csv`;
+        link.click();
+    }
+
+    init();
+</script>
 </body>
-
 </html>
