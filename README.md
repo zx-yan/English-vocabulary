@@ -1,2 +1,2 @@
 # English-vocabulary
-this repository contain  many vocabulary
+this repository contain  many vocabularies
